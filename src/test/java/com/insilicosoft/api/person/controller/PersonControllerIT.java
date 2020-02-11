@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.insilicosoft.api.person.dao.jpa.PersonRepository;
 
 /**
- *
+ * Integration test the Person API.
  *
  * @author geoff
  */
