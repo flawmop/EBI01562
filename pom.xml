@@ -72,6 +72,11 @@
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
     <dependency>
+      <!-- https://spring.io/guides/tutorials/bookmarks/#_what_makes_something_restful -->
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-hateoas</artifactId>
+    </dependency>
+    <dependency>
       <!-- @ComponentScan, @SpringBootApplication, SpringApplication, etc. -->
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>

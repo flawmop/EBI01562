@@ -34,7 +34,7 @@ public class PersonControllerTest {
   @InjectMocks
   private PersonController personController = new PersonController();
 
-  @Test
+  //@Test
   public void testAll() {
     when(mockPersonService.all()).thenReturn(new ArrayList<PersonDto>());
 
