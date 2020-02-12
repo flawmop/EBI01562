@@ -6,11 +6,13 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
 import com.insilicosoft.api.person.dao.jpa.PersonRepository;
 import com.insilicosoft.api.person.entity.Person;
 import com.insilicosoft.api.person.exception.InvalidRequestException;
+import com.insilicosoft.api.person.exception.PersonNotFoundException;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -43,6 +45,19 @@ public class PersonServiceImpl implements PersonService {
   }
 
   /* (non-Javadoc)
+   * @see com.insilicosoft.api.person.service.PersonService#deletePerson(java.lang.Long)
+   */
+  public void deletePerson(final Long personId) throws PersonNotFoundException {
+    log.debug("~deletePerson() : Invoked : [" + personId + "]");
+
+    try {
+      repository.deleteById(personId);
+    } catch (EmptyResultDataAccessException e) {
+      throw new PersonNotFoundException(String.valueOf(personId));
+    }
+  }
+
+  /* (non-Javadoc)
    * @see com.insilicosoft.api.person.service.PersonService#newPerson(com.insilicosoft.api.person.value.PersonDto)
    */
   public PersonDto newPerson(final PersonDto newPerson)
@@ -58,6 +73,23 @@ public class PersonServiceImpl implements PersonService {
     }
 
     return new PersonDto(repository.save(personEntity));
+  }
+
+  /* (non-Javadoc)
+   * @see com.insilicosoft.api.person.service.PersonService#updatePerson(java.lang.Long, com.insilicosoft.api.person.value.PersonDto)
+   */
+  public PersonDto updatePerson(final Long personId, final PersonDto personDto)
+                                throws InvalidRequestException,
+                                       PersonNotFoundException {
+    log.debug("~deletePerson() : Invoked : [" + personId + "] : '" + personDto + "'");
+    final Person updatedPerson = repository.findById(personId)
+                                    .map(existingPerson -> {
+                                      existingPerson.setName(personDto.getName());
+                                      return repository.save(existingPerson);
+                                    }).orElseThrow(
+                                     () -> new PersonNotFoundException(String.valueOf(personId))
+                                    );
+    return new PersonDto(updatedPerson);
   }
 
 }

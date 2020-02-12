@@ -3,6 +3,7 @@ package com.insilicosoft.api.person.service;
 import java.util.List;
 
 import com.insilicosoft.api.person.exception.InvalidRequestException;
+import com.insilicosoft.api.person.exception.PersonNotFoundException;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -20,12 +21,36 @@ public interface PersonService {
   List<PersonDto> all();
 
   /**
-   * Add a new person.
+   * Delete a person.
    * 
-   * @param newPerson Person to add.
-   * @return Added person.
+   * @param personId System id of {@linkplain com.insilicosoft.api.person.entity.Person}
+   *                 to delete.
+   * @throws PersonNotFoundException If {@code Person} with specified {@code id}
+   *                                 not found. 
+   */
+  void deletePerson(final Long personId) throws PersonNotFoundException;
+
+  /**
+   * Add a new {@code Person}.
+   * 
+   * @param newPerson {@code Person} as DTO to add.
+   * @return Added {@code Person} as DTO.
    * @throws InvalidRequestException If invalid data submitted.
    */
   PersonDto newPerson(final PersonDto newPerson) throws InvalidRequestException;
 
+  /**
+   * Update a {@code Person}.
+   * 
+   * @param personId System id of {@linkplain com.insilicosoft.api.person.entity.Person}
+   *                 to delete.
+   * @param personDto {@code Person} as DTO to update.
+   * @return Updated {@code Person} as DTO.
+   * @throws InvalidRequestException If invalid data submitted.
+   * @throws PersonNotFoundException If {@code Person} with specified {@code id}
+   *                                 not found. 
+   */
+  PersonDto updatePerson(final Long personId,
+                         final PersonDto personDto)
+                         throws InvalidRequestException, PersonNotFoundException;
 }

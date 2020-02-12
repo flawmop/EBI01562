@@ -11,10 +11,18 @@ public class InvalidRequestException extends Exception {
 
   private static final String defaultMessage = "Invalid request received";
 
+  /**
+   * Default constructor (assigning default message).
+   */
   public InvalidRequestException() {
     super(defaultMessage);
   }
 
+  /**
+   * Initialising constructor.
+   * 
+   * @param message Exception message.
+   */
   public InvalidRequestException(final String message) {
     super(message);
   }

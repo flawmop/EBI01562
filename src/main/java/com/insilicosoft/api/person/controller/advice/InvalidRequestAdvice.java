@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.insilicosoft.api.person.exception.InvalidRequestException;
+import com.insilicosoft.api.person.exception.PersonNotFoundException;
 
 /**
  * Controller advice to capture invalid incoming requests.
@@ -30,4 +31,15 @@ public class InvalidRequestAdvice {
     return e.getMessage();
   }
 
+  /**
+   * 
+   * @param e
+   * @return
+   */
+  @ResponseBody
+  @ExceptionHandler(PersonNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public String personNotFoundHandler(final PersonNotFoundException e) {
+    return e.getMessage();
+  }
 }

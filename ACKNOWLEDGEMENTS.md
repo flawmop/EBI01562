@@ -11,3 +11,4 @@
  1. [Spring Boot and OAuth2](https://spring.io/guides/tutorials/spring-boot-oauth2/)
  1. [Spring REST API + OAuth2 + Angular](https://www.baeldung.com/rest-api-spring-oauth2-angular)
  1. [Logging in Spring Boot](https://www.baeldung.com/spring-boot-logging)
+ 1. [An Intro to Spring HATEOAS](https://www.baeldung.com/spring-hateoas-tutorial)
