@@ -25,8 +25,8 @@ public interface PersonService {
    * 
    * @param personId System id of {@linkplain com.insilicosoft.api.person.entity.Person}
    *                 to delete.
-   * @throws PersonNotFoundException If {@code Person} with specified {@code id}
-   *                                 not found. 
+   * @throws PersonNotFoundException If {@code Person} with specified
+   *                                 {@code personId} not found. 
    */
   void deletePerson(final Long personId) throws PersonNotFoundException;
 
@@ -38,6 +38,16 @@ public interface PersonService {
    * @throws InvalidRequestException If invalid data submitted.
    */
   PersonDto newPerson(final PersonDto newPerson) throws InvalidRequestException;
+
+  /**
+   * Retrieve {@code Person} with specified id.
+   * 
+   * @param personId System identifier.
+   * @return Person with specified identifier.
+   * @throws PersonNotFoundException If {@code Person} with specified
+   *                                 {@code personId} not found. 
+   */
+  PersonDto one(final Long personId) throws PersonNotFoundException;
 
   /**
    * Update a {@code Person}.

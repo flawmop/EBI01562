@@ -76,19 +76,33 @@ public class PersonServiceImpl implements PersonService {
   }
 
   /* (non-Javadoc)
+   * @see com.insilicosoft.api.person.service.PersonService#one(java.lang.Long)
+   */
+  @Override
+  public PersonDto one(final Long personId) throws PersonNotFoundException {
+    log.debug("~one() : Invoked : [" + personId + "]");
+
+    final Person foundPerson = repository.findById(personId)
+                                         .orElseThrow(
+                                             () -> new PersonNotFoundException(String.valueOf(personId))
+                                           );
+    return new PersonDto(foundPerson);
+  }
+
+  /* (non-Javadoc)
    * @see com.insilicosoft.api.person.service.PersonService#updatePerson(java.lang.Long, com.insilicosoft.api.person.value.PersonDto)
    */
   public PersonDto updatePerson(final Long personId, final PersonDto personDto)
                                 throws InvalidRequestException,
                                        PersonNotFoundException {
-    log.debug("~deletePerson() : Invoked : [" + personId + "] : '" + personDto + "'");
+    log.debug("~updatePerson() : Invoked : [" + personId + "] : '" + personDto + "'");
     final Person updatedPerson = repository.findById(personId)
-                                    .map(existingPerson -> {
-                                      existingPerson.setName(personDto.getName());
-                                      return repository.save(existingPerson);
-                                    }).orElseThrow(
-                                     () -> new PersonNotFoundException(String.valueOf(personId))
-                                    );
+                                           .map(existingPerson -> {
+                                             existingPerson.setName(personDto.getName());
+                                             return repository.save(existingPerson);
+                                           }).orElseThrow(
+                                             () -> new PersonNotFoundException(String.valueOf(personId))
+                                           );
     return new PersonDto(updatedPerson);
   }
 

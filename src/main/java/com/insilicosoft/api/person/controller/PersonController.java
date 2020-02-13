@@ -38,7 +38,8 @@ import com.insilicosoft.api.person.value.PersonDto;
  * @author geoff
  */
 @RestController
-@RequestMapping(value = "/persons")
+@RequestMapping(value = "/persons",
+                produces = { "application/hal+json" })
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class PersonController {
 
@@ -56,29 +57,38 @@ public class PersonController {
 
     public PersonDtoResource(final PersonDto personDto) {
       super();
-      setPersonId(String.valueOf(personDto.getId()));
+      final Long personId = personDto.getId();
+
+      setPersonId(String.valueOf(personId));
       setPersonName(personDto.getName());
 
-      final List<Link> links = new ArrayList<Link>();
-      links.add(linkTo(PersonController.class).slash(getPersonId())
-                                              .withSelfRel());
-      try {
-        // Plenty code here for sparse return! 
-        links.add(linkTo(methodOn(PersonController.class).deletePerson(Long.valueOf(getPersonId())))
-                                                         .withRel("delete"));
-      } catch (PersonNotFoundException e) {}
-      try {
-        // Plenty code here for sparse return! 
-        links.add(linkTo(methodOn(PersonController.class).updatePerson(Long.valueOf(getPersonId()), personDto))
-                                                         .withRel("update"));
-      } catch (InvalidRequestException e1) {
-      } catch (PersonNotFoundException e2) {}
+      if (personId != null) {
+        /*
+         * Person has been persisted, so establish links to self, deletion and
+         * updating operations.
+         */
+        final List<Link> links = new ArrayList<Link>();
 
-      for (final Link link : links) {
-        add(link);
+        links.add(linkTo(PersonController.class).slash(personId)
+                                                .withSelfRel());
+        try {
+          links.add(linkTo(methodOn(PersonController.class).deletePerson(personId))
+                                                           .withRel("delete"));
+        } catch (PersonNotFoundException e) {}
+        try {
+          links.add(linkTo(methodOn(PersonController.class).updatePerson(personId,
+                                                                         personDto))
+                                                           .withRel("update"));
+        } catch (InvalidRequestException e1) {
+        } catch (PersonNotFoundException e2) {}
+
+        for (final Link link : links) {
+          add(link);
+        }
       }
     }
 
+    @SuppressWarnings("unused")
     public String getPersonId() {
       return personId;
     }
@@ -119,7 +129,7 @@ public class PersonController {
    * </pre>
    * @return Collection of all people.
    */
-  @GetMapping(produces = { "application/hal+json" })
+  @GetMapping()
   @ResponseStatus(HttpStatus.OK)
   public Resources<PersonDtoResource> all() {
     log.debug("~all() : Invoked.");
@@ -142,7 +152,7 @@ public class PersonController {
    * @param personId System identifier of {@link Person} to delete.
    * @throws PersonNotFoundException If person not found.
    */
-  @DeleteMapping(value = "/{personId}", produces = { "application/hal+json" })
+  @DeleteMapping(value = "/{personId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity<Void> deletePerson(final @PathVariable("personId")
                                                  Long personId)
@@ -161,7 +171,7 @@ public class PersonController {
    * @return The new person.
    * @throws InvalidRequestException If invalid data supplied.
    */
-  @PostMapping(produces = { "application/hal+json" })
+  @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
   public Resources<PersonDtoResource> newPerson(final @RequestBody
                                                       PersonDto personDto) 
@@ -176,6 +186,27 @@ public class PersonController {
   }
 
   /**
+   * Retrieve specified {@link Person}.
+   * 
+   * @param personId System identifier of {@link Person} to delete.
+   * @return The specified {@link Person}.
+   * @throws PersonNotFoundException If person not found.
+   */
+  @GetMapping(value = "/{personId}")
+  @ResponseStatus(HttpStatus.OK)
+  public Resources<PersonDtoResource> one(final @PathVariable("personId")
+                                                Long personId)
+                                          throws PersonNotFoundException {
+    log.debug("~one() : Invoked : [" + personId + "]");
+
+    final List<PersonDtoResource> colOfOne = new ArrayList<PersonDtoResource>();
+    colOfOne.add(new PersonDtoResource(personService.one(personId)));
+    return new Resources<PersonDtoResource>(colOfOne,
+                                            linkTo(PersonController.class)
+                                                  .withSelfRel());
+  }
+
+  /**
    * Update a person.
    * 
    * @param personId System identifier of {@link Person} to update.
@@ -184,7 +215,7 @@ public class PersonController {
    * @throws InvalidRequestException If invalid data supplied.
    * @throws PersonNotFoundException If person not found.
    */
-  @PutMapping(value = "/{personId}", produces = { "application/hal+json" })
+  @PutMapping(value = "/{personId}")
   @ResponseStatus(HttpStatus.OK)
   public Resources<PersonDtoResource> updatePerson(final @PathVariable("personId")
                                                          Long personId,

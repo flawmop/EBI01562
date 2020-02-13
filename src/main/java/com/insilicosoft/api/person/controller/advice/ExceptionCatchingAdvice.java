@@ -10,12 +10,12 @@ import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
 
 /**
- * Controller advice to capture invalid incoming requests.
+ * Controller advice to capture anticipated exceptions.
  *
  * @author geoff
  */
 @ControllerAdvice
-public class InvalidRequestAdvice {
+public class ExceptionCatchingAdvice {
 
   /**
    * Advice handling of captured invalid request exceptions.
@@ -32,9 +32,10 @@ public class InvalidRequestAdvice {
   }
 
   /**
+   * Advice handling of captured person not found exception.
    * 
-   * @param e
-   * @return
+   * @param e Person not found exception.
+   * @return Exception message (in response body) for additional detail.
    */
   @ResponseBody
   @ExceptionHandler(PersonNotFoundException.class)
