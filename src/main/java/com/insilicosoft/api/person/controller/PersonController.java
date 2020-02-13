@@ -38,8 +38,7 @@ import com.insilicosoft.api.person.value.PersonDto;
  * @author geoff
  */
 @RestController
-@RequestMapping(value = "/persons",
-                produces = { "application/hal+json" })
+@RequestMapping(value = "/persons")
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class PersonController {
 
@@ -51,15 +50,13 @@ public class PersonController {
   // Enable a HAL-compatible representation of the Person DTO!
   // https://stackoverflow.com/questions/33289753/how-to-change-the-property-name-of-an-embbed-collection-in-spring-hateos
   @Relation(collectionRelation = "persons")
-  private class PersonDtoResource extends ResourceSupport {
-    private String personId;
+  private class PersonResource extends ResourceSupport {
     private String personName;
 
-    public PersonDtoResource(final PersonDto personDto) {
+    public PersonResource(final PersonDto personDto) {
       super();
       final Long personId = personDto.getId();
 
-      setPersonId(String.valueOf(personId));
       setPersonName(personDto.getName());
 
       if (personId != null) {
@@ -86,15 +83,6 @@ public class PersonController {
           add(link);
         }
       }
-    }
-
-    @SuppressWarnings("unused")
-    public String getPersonId() {
-      return personId;
-    }
-
-    public void setPersonId(String personId) {
-      this.personId = personId;
     }
 
     @SuppressWarnings("unused")
@@ -129,21 +117,21 @@ public class PersonController {
    * </pre>
    * @return Collection of all people.
    */
-  @GetMapping()
+  @GetMapping(produces = { "application/hal+json" })
   @ResponseStatus(HttpStatus.OK)
-  public Resources<PersonDtoResource> all() {
+  public Resources<PersonResource> all() {
     log.debug("~all() : Invoked.");
 
-    final List<PersonDtoResource> allPersons = new ArrayList<PersonDtoResource>();
+    final List<PersonResource> allPersons = new ArrayList<PersonResource>();
     for (final PersonDto personDto : personService.all()) {
-      final PersonDtoResource personDtoResource = new PersonDtoResource(personDto);
+      final PersonResource personDtoResource = new PersonResource(personDto);
 
       allPersons.add(personDtoResource);
     }
 
-    return new Resources<PersonDtoResource>(allPersons,
-                                            linkTo(PersonController.class)
-                                                  .withSelfRel());
+    return new Resources<PersonResource>(allPersons,
+                                         linkTo(PersonController.class)
+                                               .withSelfRel());
   }
 
   /**
@@ -152,7 +140,8 @@ public class PersonController {
    * @param personId System identifier of {@link Person} to delete.
    * @throws PersonNotFoundException If person not found.
    */
-  @DeleteMapping(value = "/{personId}")
+  @DeleteMapping(value = "/{personId}",
+                 produces = { "application/problem+json" })
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity<Void> deletePerson(final @PathVariable("personId")
                                                  Long personId)
@@ -171,18 +160,18 @@ public class PersonController {
    * @return The new person.
    * @throws InvalidRequestException If invalid data supplied.
    */
-  @PostMapping()
+  @PostMapping(produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.CREATED)
-  public Resources<PersonDtoResource> newPerson(final @RequestBody
-                                                      PersonDto personDto) 
-                             throws InvalidRequestException {
+  public Resources<PersonResource> newPerson(final @RequestBody
+                                                   PersonDto personDto) 
+                                             throws InvalidRequestException {
     log.debug("~newPerson() : Invoked : '" + personDto + "'");
 
-    final List<PersonDtoResource> colOfOne = new ArrayList<PersonDtoResource>();
-    colOfOne.add(new PersonDtoResource(personService.newPerson(personDto)));
-    return new Resources<PersonDtoResource>(colOfOne,
-                                            linkTo(PersonController.class)
-                                                  .withSelfRel());
+    final List<PersonResource> colOfOne = new ArrayList<PersonResource>();
+    colOfOne.add(new PersonResource(personService.newPerson(personDto)));
+    return new Resources<PersonResource>(colOfOne,
+                                         linkTo(PersonController.class)
+                                               .withSelfRel());
   }
 
   /**
@@ -192,16 +181,17 @@ public class PersonController {
    * @return The specified {@link Person}.
    * @throws PersonNotFoundException If person not found.
    */
-  @GetMapping(value = "/{personId}")
+  @GetMapping(value = "/{personId}",
+              produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.OK)
-  public Resources<PersonDtoResource> one(final @PathVariable("personId")
-                                                Long personId)
-                                          throws PersonNotFoundException {
+  public Resources<PersonResource> one(final @PathVariable("personId")
+                                             Long personId)
+                                       throws PersonNotFoundException {
     log.debug("~one() : Invoked : [" + personId + "]");
 
-    final List<PersonDtoResource> colOfOne = new ArrayList<PersonDtoResource>();
-    colOfOne.add(new PersonDtoResource(personService.one(personId)));
-    return new Resources<PersonDtoResource>(colOfOne,
+    final List<PersonResource> colOfOne = new ArrayList<PersonResource>();
+    colOfOne.add(new PersonResource(personService.one(personId)));
+    return new Resources<PersonResource>(colOfOne,
                                             linkTo(PersonController.class)
                                                   .withSelfRel());
   }
@@ -215,21 +205,22 @@ public class PersonController {
    * @throws InvalidRequestException If invalid data supplied.
    * @throws PersonNotFoundException If person not found.
    */
-  @PutMapping(value = "/{personId}")
+  @PutMapping(value = "/{personId}",
+              produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.OK)
-  public Resources<PersonDtoResource> updatePerson(final @PathVariable("personId")
-                                                         Long personId,
-                                                   final @RequestBody
-                                                         PersonDto personDto)
-                                                   throws InvalidRequestException,
-                                                          PersonNotFoundException {
+  public Resources<PersonResource> updatePerson(final @PathVariable("personId")
+                                                      Long personId,
+                                                final @RequestBody
+                                                      PersonDto personDto)
+                                                throws InvalidRequestException,
+                                                       PersonNotFoundException {
     log.debug("~updatePerson() : Invoked : [" + personId + "] : '" + personDto + "'");
 
-    final List<PersonDtoResource> colOfOne = new ArrayList<PersonDtoResource>();
-    colOfOne.add(new PersonDtoResource(personService.updatePerson(personId,
-                                                                  personDto)));
-    return new Resources<PersonDtoResource>(colOfOne,
-                                            linkTo(PersonController.class)
-                                                  .withSelfRel());
+    final List<PersonResource> colOfOne = new ArrayList<PersonResource>();
+    colOfOne.add(new PersonResource(personService.updatePerson(personId,
+                                                               personDto)));
+    return new Resources<PersonResource>(colOfOne,
+                                         linkTo(PersonController.class)
+                                               .withSelfRel());
   }
 }

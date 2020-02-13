@@ -1,5 +1,6 @@
 package com.insilicosoft.api.person.value;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.insilicosoft.api.person.entity.Person;
 
 /**
@@ -10,6 +11,8 @@ import com.insilicosoft.api.person.entity.Person;
  */
 public class PersonDto {
 
+  // Don't show the id in Swagger UI's.
+  @JsonIgnore
   private Long id;
   private String name;
 

@@ -39,6 +39,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+    <io.springfox.swagger.version>2.9.2</io.springfox.swagger.version>
     <powermock.version>2.0.5</powermock.version>
   </properties>
 
@@ -67,6 +68,17 @@
       <artifactId>h2</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger2</artifactId>
+      <version>${io.springfox.swagger.version}</version>
+    </dependency>
+    <dependency>
+      <!-- http://127.0.0.1:8080/swagger-ui.html -->
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger-ui</artifactId>
+      <version>${io.springfox.swagger.version}</version>
+    </dependency>
+    <dependency>
       <!-- javax.persistence.*, etc. -->
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -80,6 +92,11 @@
       <!-- @ComponentScan, @SpringBootApplication, SpringApplication, etc. -->
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.zalando</groupId>
+      <artifactId>problem-spring-web-starter</artifactId>
+      <version>0.25.2</version>
     </dependency>
   </dependencies>
 

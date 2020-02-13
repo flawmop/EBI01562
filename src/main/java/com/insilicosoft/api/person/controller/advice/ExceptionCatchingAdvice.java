@@ -1,10 +1,13 @@
 package com.insilicosoft.api.person.controller.advice;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
 import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
@@ -13,9 +16,18 @@ import com.insilicosoft.api.person.exception.PersonNotFoundException;
  * Controller advice to capture anticipated exceptions.
  *
  * @author geoff
+ * @see https://github.com/spring-projects/spring-framework/issues/21927
+ * @see https://github.com/spring-projects/spring-framework/issues/20865
+ * @see https://tools.ietf.org/html/rfc7807
  */
 @ControllerAdvice
 public class ExceptionCatchingAdvice {
+
+  private final static HttpHeaders problemHeaders = new HttpHeaders();
+
+  static {
+    problemHeaders.setContentType(MediaType.APPLICATION_PROBLEM_JSON_UTF8);
+  }
 
   /**
    * Advice handling of captured invalid request exceptions.
@@ -23,12 +35,15 @@ public class ExceptionCatchingAdvice {
    * @param e Invalid request exception.
    * @return Exception message (in response body) for additional detail.
    */
-  @ResponseBody
   @ExceptionHandler(InvalidRequestException.class)
   // https://stackoverflow.com/questions/6123425/rest-response-code-for-invalid-data
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public String requestNotPermissibleHandler(final InvalidRequestException e) {
-    return e.getMessage();
+  public ResponseEntity<Problem> requestNotPermissibleHandler(final InvalidRequestException e) {
+    return new ResponseEntity<Problem>(Problem.builder()
+                                              .withTitle("Invalid request submitted")
+                                              .withStatus(Status.BAD_REQUEST)
+                                              .withDetail(e.getMessage())
+                                              .build(),
+                                        problemHeaders, HttpStatus.BAD_REQUEST);
   }
 
   /**
@@ -37,10 +52,13 @@ public class ExceptionCatchingAdvice {
    * @param e Person not found exception.
    * @return Exception message (in response body) for additional detail.
    */
-  @ResponseBody
   @ExceptionHandler(PersonNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public String personNotFoundHandler(final PersonNotFoundException e) {
-    return e.getMessage();
+  public ResponseEntity<Problem> personNotFoundHandler(final PersonNotFoundException e) {
+    return new ResponseEntity<Problem>(Problem.builder()
+                                              .withTitle("Person not found")
+                                              .withStatus(Status.NOT_FOUND)
+                                              .withDetail(e.getMessage())
+                                              .build(),
+                                        problemHeaders, HttpStatus.NOT_FOUND);
   }
 }
