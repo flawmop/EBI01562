@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.zalando.problem.Problem;
 
 import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
@@ -47,7 +49,10 @@ public class PersonController {
 
   private static final Log log = LogFactory.getLog(PersonController.class);
 
-  // Enable a HAL-compatible representation of the Person DTO!
+  /*
+   *  Enable a HAL-compatible representation of the Person DTO!
+   *  TODO : Consider https://spring.io/guides/tutorials/bookmarks/#_simplifying_link_creation
+   */
   // https://stackoverflow.com/questions/33289753/how-to-change-the-property-name-of-an-embbed-collection-in-spring-hateos
   @Relation(collectionRelation = "persons")
   private class PersonResource extends ResourceSupport {
@@ -96,18 +101,24 @@ public class PersonController {
   }
 
   /**
-   * Retrieve a HAL-format collection of all people (via a {@code GET} request).
+   * Retrieve a HAL-format response of collection of all people (via a
+   * {@code GET} request) e.g.
    * <pre>
    * {@code 
    * {
    *   "_embedded": {
    *     "persons": [
    *       {
-   *         "personId": "1",
-   *         "personName": "fish1",
+   *         "personName": "fish",
    *         "_links": {
    *           "self": {
-   *             "href": "http://127.0.0.1:8080/persons/1"
+   *           "href": "http://127.0.0.1:8080/persons/2"
+   *           },
+   *           "delete": {
+   *             "href": "http://127.0.0.1:8080/persons/2"
+   *           },
+   *           "update": {
+   *             "href": "http://127.0.0.1:8080/persons/2"
    *           }
    *         }
    *       },
@@ -115,9 +126,9 @@ public class PersonController {
    *   }
    * }
    * </pre>
-   * @return Collection of all people.
+   * @return Collection of all people (or {@link Problem} if invalid accept type)
    */
-  @GetMapping(produces = { "application/hal+json" })
+  @GetMapping(produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.OK)
   public Resources<PersonResource> all() {
     log.debug("~all() : Invoked.");
@@ -205,8 +216,8 @@ public class PersonController {
    * @throws InvalidRequestException If invalid data supplied.
    * @throws PersonNotFoundException If person not found.
    */
-  @PutMapping(value = "/{personId}",
-              produces = { "application/hal+json", "application/problem+json" })
+  @PatchMapping(value = "/{personId}",
+                produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.OK)
   public Resources<PersonResource> updatePerson(final @PathVariable("personId")
                                                       Long personId,

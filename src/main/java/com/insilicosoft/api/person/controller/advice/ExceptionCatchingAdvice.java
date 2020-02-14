@@ -13,12 +13,12 @@ import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
 
 /**
- * Controller advice to capture anticipated exceptions.
+ * Controller advice to capture anticipated exceptions and respond as
+ * {@link Problem}s with the {@code MediaType.APPLICATION_PROBLEM_JSON_UTF8}
+ * content type.
  *
  * @author geoff
- * @see https://github.com/spring-projects/spring-framework/issues/21927
- * @see https://github.com/spring-projects/spring-framework/issues/20865
- * @see https://tools.ietf.org/html/rfc7807
+ * @see <a href="https://tools.ietf.org/html/rfc7807">RFC 7807: Problem Details for HTTP APIs</a>
  */
 @ControllerAdvice
 public class ExceptionCatchingAdvice {
@@ -26,6 +26,8 @@ public class ExceptionCatchingAdvice {
   private final static HttpHeaders problemHeaders = new HttpHeaders();
 
   static {
+    // https://github.com/spring-projects/spring-framework/issues/21927
+    // https://github.com/spring-projects/spring-framework/issues/20865
     problemHeaders.setContentType(MediaType.APPLICATION_PROBLEM_JSON_UTF8);
   }
 

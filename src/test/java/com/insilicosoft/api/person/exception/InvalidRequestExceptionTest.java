@@ -14,12 +14,12 @@ public class InvalidRequestExceptionTest {
   private InvalidRequestException invReqException;
 
   @Test
-  public void testDefaultConstructor() {
+  public void testConstructors() {
     invReqException = new InvalidRequestException();
 
     assertEquals("Invalid request received", invReqException.getMessage());
 
-    String dummyMessage = "dummyMessage";
+    final String dummyMessage = "dummyMessage";
 
     invReqException = new InvalidRequestException(dummyMessage);
 
