@@ -19,9 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -55,13 +55,21 @@ public class PersonController {
   // https://stackoverflow.com/questions/33289753/how-to-change-the-property-name-of-an-embbed-collection-in-spring-hateos
   @Relation(collectionRelation = "persons")
   private class PersonResource extends ResourceSupport {
-    private String personName;
+    private String personFirstName;
+    private String personLastName;
+    private Integer personAge;
+    private String personFavouriteColour;
+    private String[] personHobbies = {};
 
     public PersonResource(final PersonDto personDto) {
       super();
       final Long personId = personDto.getId();
 
-      setPersonName(personDto.getName());
+      setPersonFirstName(personDto.getFirst_name());
+      setPersonLastName(personDto.getLast_name());
+      setPersonAge(personDto.getAge());
+      setPersonFavouriteColour(personDto.getFavourite_colour());
+      setPersonHobbies(personDto.getHobby());
 
       if (personId != null) {
         /*
@@ -90,12 +98,48 @@ public class PersonController {
     }
 
     @SuppressWarnings("unused")
-    public String getPersonName() {
-      return personName;
+    public String getPersonFirstName() {
+      return personFirstName;
     }
 
-    public void setPersonName(String personName) {
-      this.personName = personName;
+    public void setPersonFirstName(final String personFirstName) {
+      this.personFirstName = personFirstName;
+    }
+
+    @SuppressWarnings("unused")
+    public String getPersonLastName() {
+      return personLastName;
+    }
+
+    public void setPersonLastName(final String personLastName) {
+      this.personLastName = personLastName;
+    }
+
+    @SuppressWarnings("unused")
+    public Integer getPersonAge() {
+      return personAge;
+    }
+
+    public void setPersonAge(final Integer personAge) {
+      this.personAge = personAge;
+    }
+
+    @SuppressWarnings("unused")
+    public String getPersonFavouriteColour() {
+      return personFavouriteColour;
+    }
+
+    public void setPersonFavouriteColour(final String personFavouriteColour) {
+      this.personFavouriteColour = personFavouriteColour;
+    }
+
+    @SuppressWarnings("unused")
+    public String[] getPersonHobbies() {
+      return personHobbies;
+    }
+
+    public void setPersonHobbies(final String[] personHobbies) {
+      this.personHobbies = personHobbies;
     }
   }
 
@@ -108,7 +152,13 @@ public class PersonController {
    *   "_embedded": {
    *     "persons": [
    *       {
-   *         "personName": "fish",
+   *         "personFirstName": "fish1chip1",
+   *         "personLastName": "aslfk",
+   *         "personAge": null,
+   *         "personFavouriteColour": null,
+   *         "personHobbies": [
+   *           "fishing"
+   *         ],
    *         "_links": {
    *           "self": {
    *           "href": "http://127.0.0.1:8080/persons/2"
@@ -215,8 +265,8 @@ public class PersonController {
    * @throws InvalidRequestException If invalid data supplied.
    * @throws PersonNotFoundException If person not found.
    */
-  @PatchMapping(value = "/{personId}",
-                produces = { "application/hal+json", "application/problem+json" })
+  @PutMapping(value = "/{personId}",
+              produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.OK)
   public Resources<PersonResource> updatePerson(final @PathVariable("personId")
                                                       Long personId,

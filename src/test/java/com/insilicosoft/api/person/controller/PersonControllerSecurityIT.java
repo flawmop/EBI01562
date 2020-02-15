@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.assertj.core.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -45,8 +46,18 @@ public class PersonControllerSecurityIT {
   private static final String urlTemplatePersons = "/persons";
   private static final String dummyUserName = "dummyUserName";
   private static final String dummyPassword = "dummyPassword";
-  private static final String dummyName = "dummyName";
+  private static final String dummyFirstName = "dummyFirstName";
+  private static final String dummyLastName = "dummyLastName";
+  private static final Integer dummyAge = 10;
+  private static final String dummyFavouriteColour = "dummyFavouriteColour";
+  private static final String[] dummyHobbies = {};
   private static final Long dummyPersonId = 1L;
+
+  private static final String dummyJson = "{\"first_name\":\"%s\","
+                                         + "\"last_name\":\"%s\","
+                                         + "\"age\":\"%s\","
+                                         + "\"favourite_colour\":\"%s\","
+                                         + "\"hobby\": %s }";
 
   // No authentication.
   @Test
@@ -83,7 +94,10 @@ public class PersonControllerSecurityIT {
   public void new_login_403() throws Exception {
     mockMvc.perform(post(urlTemplatePersons)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8)
-                    .content("{ \"name\" : \"" + dummyName + "\" }"))
+                    .content(String.format(dummyJson, dummyFirstName,
+                                           dummyLastName, dummyAge,
+                                           dummyFavouriteColour,
+                                           Arrays.asList(dummyHobbies).toString())))
            //.andDo(print())
            .andExpect(status().isForbidden());
   }
@@ -98,17 +112,28 @@ public class PersonControllerSecurityIT {
     when(mockPersonService.newPerson(Mockito.isA(PersonDto.class)))
         .thenReturn(mockPersonDto);
     when(mockPersonDto.getId()).thenReturn(dummyPersonId);
-    when(mockPersonDto.getName()).thenReturn(dummyName);
+    when(mockPersonDto.getFirst_name()).thenReturn(dummyFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(dummyLastName);
+    when(mockPersonDto.getAge()).thenReturn(dummyAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(dummyFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(dummyHobbies);
 
     mockMvc.perform(post(urlTemplatePersons)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8)
-                    .content("{ \"name\" : \"" + dummyName + "\" }"))
+                    .content(String.format(dummyJson, dummyFirstName,
+                                           dummyLastName, dummyAge,
+                                           dummyFavouriteColour,
+                                           Arrays.asList(dummyHobbies).toString())))
            //.andDo(print())
            .andExpect(status().isCreated());
 
     verify(mockPersonService, times(1)).newPerson(Mockito.isA(PersonDto.class));
     verify(mockPersonDto, times(1)).getId();
-    verify(mockPersonDto, times(1)).getName();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
 
     verifyNoMoreInteractions(mockPersonService, mockPersonDto);
   }

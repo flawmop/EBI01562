@@ -47,7 +47,11 @@ public class PersonServiceImplPowerMockTest {
   @InjectMocks
   private PersonService personService = new PersonServiceImpl();
 
-  private static final String dummyName = "dummyName";
+  private static final String dummyFirstName = "dummyFirstName";
+  private static final String dummyLastName = "dummyLastName";
+  private static final Integer dummyAge = 10;
+  private static final String dummyFavouriteColour = "dummyFavouriteColour";
+  private static final String[] dummyHobbies = {};
 
   /*
    * https://stackoverflow.com/questions/5920153/test-class-with-a-new-call-in-it-with-mockito
@@ -83,9 +87,16 @@ public class PersonServiceImplPowerMockTest {
   @Test
   public void testNewPersonExceptionThrowing() throws Exception {
     // It's a valid name (to ensure it's PowerMockito.whenNew(..) in effect!)
-    when(mockPersonDto.getName()).thenReturn(dummyName);
+    when(mockPersonDto.getFirst_name()).thenReturn(dummyFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(dummyLastName);
+    when(mockPersonDto.getAge()).thenReturn(dummyAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(dummyFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(dummyHobbies);
+
     final String dummyException = "dummyException";
-    whenNew(Person.class).withArguments(dummyName)
+    whenNew(Person.class).withArguments(dummyFirstName, dummyLastName,
+                                        dummyAge, dummyFavouriteColour,
+                                        dummyHobbies)
            .thenThrow(new IllegalArgumentException(dummyException));
     try {
       personService.newPerson(mockPersonDto);
@@ -94,17 +105,27 @@ public class PersonServiceImplPowerMockTest {
       assertEquals(dummyException, e.getMessage());
     }
 
-    verify(mockPersonDto, times(1)).getName();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
 
     verifyNoMoreInteractions(mockPersonRepository, mockPersonDto);
   }
 
   @Test
   public void testNewPerson() throws Exception {
-    when(mockPersonDto.getName()).thenReturn(dummyName);
+    when(mockPersonDto.getFirst_name()).thenReturn(dummyFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(dummyLastName);
+    when(mockPersonDto.getAge()).thenReturn(dummyAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(dummyFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(dummyHobbies);
     // Create new Person entity from PersonDto
     final Person mockPerson = mock(Person.class);
-    whenNew(Person.class).withArguments(dummyName)
+    whenNew(Person.class).withArguments(dummyFirstName, dummyLastName,
+                                        dummyAge, dummyFavouriteColour,
+                                        dummyHobbies)
            .thenReturn(mockPerson);
     final Person mockSavedPerson = mock(Person.class);
     when(mockPersonRepository.save(mockPerson))
@@ -121,7 +142,11 @@ public class PersonServiceImplPowerMockTest {
       fail("Should not have thrown exception");
     }
 
-    verify(mockPersonDto, times(1)).getName();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
     verify(mockPersonRepository, times(1)).save(any(Person.class));
 
     verifyNoMoreInteractions(mockPersonRepository, mockPerson, mockPersonDto,

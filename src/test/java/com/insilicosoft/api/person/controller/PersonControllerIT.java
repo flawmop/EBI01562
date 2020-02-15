@@ -1,5 +1,6 @@
 package com.insilicosoft.api.person.controller;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -9,8 +10,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import java.util.ArrayList;
 
+import org.assertj.core.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,8 +57,18 @@ public class PersonControllerIT {
   private PersonService mockPersonService;
 
   private static final String urlTemplatePersons = "/persons";
-  private static final String dummyName = "dummyName";
+  private static final String dummyFirstName = "dummyFirstName";
+  private static final String dummyLastName = "dummyLastName";
+  private static final Integer dummyAge = 10;
+  private static final String dummyFavouriteColour = "dummyFavouriteColour";
+  private static final String[] dummyHobbies = {};
   private static final Long dummyPersonId = 1L;
+
+  private static final String dummyJson = "{\"first_name\":\"%s\","
+                                         + "\"last_name\":\"%s\","
+                                         + "\"age\":\"%s\","
+                                         + "\"favourite_colour\":\"%s\","
+                                         + "\"hobby\":%s}";
 
   @Before
   public void setUp() {
@@ -105,7 +117,11 @@ public class PersonControllerIT {
     when(mockPersonService.one(dummyPersonId))
         .thenReturn(mockPersonDto);
     when(mockPersonDto.getId()).thenReturn(dummyPersonId);
-    when(mockPersonDto.getName()).thenReturn(dummyName);
+    when(mockPersonDto.getFirst_name()).thenReturn(dummyFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(dummyLastName);
+    when(mockPersonDto.getAge()).thenReturn(dummyAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(dummyFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(dummyHobbies);
 
     mockMvc.perform(get(urlTemplatePersons.concat("/" + dummyPersonId))
                        .header(HttpHeaders.CONTENT_TYPE, MediaType.ALL))
@@ -114,8 +130,16 @@ public class PersonControllerIT {
            .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
            .andExpect(jsonPath("$._embedded.persons").isArray())
            .andExpect(jsonPath("$._embedded.persons.length()").value(1))
-           .andExpect(jsonPath("$._embedded.persons[0].personName")
-                              .value(dummyName))
+           .andExpect(jsonPath("$._embedded.persons[0].personFirstName")
+                              .value(dummyFirstName))
+           .andExpect(jsonPath("$._embedded.persons[0].personLastName")
+                              .value(dummyLastName))
+           .andExpect(jsonPath("$._embedded.persons[0].personAge")
+                              .value(dummyAge))
+           .andExpect(jsonPath("$._embedded.persons[0].personFavouriteColour")
+                              .value(dummyFavouriteColour))
+           .andExpect(jsonPath("$._embedded.persons[0].personHobbies")
+                              .isArray())
            .andExpect(jsonPath("$._embedded.persons[0]._links.self").exists())
            .andExpect(jsonPath("$._embedded.persons[0]._links.delete").exists())
            .andExpect(jsonPath("$._embedded.persons[0]._links.update").exists())
@@ -123,13 +147,17 @@ public class PersonControllerIT {
 
     verify(mockPersonService, times(1)).one(dummyPersonId);
     verify(mockPersonDto, times(1)).getId();
-    verify(mockPersonDto, times(1)).getName();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
 
     verifyNoMoreInteractions(mockPersonService, mockPersonDto);
   }
 
   @Test
-  public void testPatchPerson() throws Exception {
+  public void testPutPerson() throws Exception {
     final PersonDto mockPersonDto = mock(PersonDto.class);
     final ArgumentCaptor<Long> personIdCaptor = ArgumentCaptor.forClass(Long.class); 
     final ArgumentCaptor<PersonDto> personDtoCaptor = ArgumentCaptor.forClass(PersonDto.class);
@@ -138,19 +166,40 @@ public class PersonControllerIT {
                                         personDtoCaptor.capture()))
         .thenReturn(mockPersonDto);
     when(mockPersonDto.getId()).thenReturn(dummyPersonId);
-    when(mockPersonDto.getName()).thenReturn(dummyName);
 
-    final String newName = "fish";
-    mockMvc.perform(patch(urlTemplatePersons.concat("/" + dummyPersonId))
-                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8)
-                         .content("{ \"name\" : \"" + newName + "\" }"))
+    final String newFirstName = "fish";
+    final String newLastName = "chips";
+    final Integer newAge = 20;
+    final String newFavouriteColour = "blue";
+    final String[] newHobbies = { "fishing" };
+    when(mockPersonDto.getFirst_name()).thenReturn(newFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(newLastName);
+    when(mockPersonDto.getAge()).thenReturn(newAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(newFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(newHobbies);
+
+    mockMvc.perform(put(urlTemplatePersons.concat("/" + dummyPersonId))
+                       .header(HttpHeaders.CONTENT_TYPE,
+                               MediaType.APPLICATION_JSON_UTF8)
+                       .content(String.format(dummyJson, newFirstName,
+                                              newLastName, newAge,
+                                              newFavouriteColour,
+                                              "[ \"fishing\" ]")))
            //.andDo(print())
            .andExpect(status().isOk())
            .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
            .andExpect(jsonPath("$._embedded.persons").isArray())
            .andExpect(jsonPath("$._embedded.persons.length()").value(1))
-           .andExpect(jsonPath("$._embedded.persons[0].personName")
-                              .value(dummyName))
+           .andExpect(jsonPath("$._embedded.persons[0].personFirstName")
+                              .value(newFirstName))
+           .andExpect(jsonPath("$._embedded.persons[0].personLastName")
+                              .value(newLastName))
+           .andExpect(jsonPath("$._embedded.persons[0].personAge")
+                              .value(newAge))
+           .andExpect(jsonPath("$._embedded.persons[0].personFavouriteColour")
+                              .value(newFavouriteColour))
+           .andExpect(jsonPath("$._embedded.persons[0].personHobbies")
+                              .isArray())
            .andExpect(jsonPath("$._embedded.persons[0]._links.self").exists())
            .andExpect(jsonPath("$._embedded.persons[0]._links.delete").exists())
            .andExpect(jsonPath("$._embedded.persons[0]._links.update").exists())
@@ -159,12 +208,21 @@ public class PersonControllerIT {
     verify(mockPersonService, times(1)).updatePerson(Mockito.isA(Long.class),
                                                      Mockito.isA(PersonDto.class));
     verify(mockPersonDto, times(1)).getId();
-    verify(mockPersonDto, times(1)).getName();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
 
     verifyNoMoreInteractions(mockPersonService, mockPersonDto);
 
     assertEquals(dummyPersonId, personIdCaptor.getValue());
-    assertEquals(newName, personDtoCaptor.getValue().getName());
+    assertEquals(newFirstName, personDtoCaptor.getValue().getFirst_name());
+    assertEquals(newLastName, personDtoCaptor.getValue().getLast_name());
+    assertEquals(newAge, personDtoCaptor.getValue().getAge());
+    assertEquals(newFavouriteColour,
+                 personDtoCaptor.getValue().getFavourite_colour());
+    assertArrayEquals(newHobbies, personDtoCaptor.getValue().getHobby());
   }
 
   @Test
@@ -174,18 +232,33 @@ public class PersonControllerIT {
     when(mockPersonService.newPerson(Mockito.isA(PersonDto.class)))
         .thenReturn(mockPersonDto);
     when(mockPersonDto.getId()).thenReturn(dummyPersonId);
-    when(mockPersonDto.getName()).thenReturn(dummyName);
+    when(mockPersonDto.getFirst_name()).thenReturn(dummyFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(dummyLastName);
+    when(mockPersonDto.getAge()).thenReturn(dummyAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(dummyFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(dummyHobbies);
 
     mockMvc.perform(post(urlTemplatePersons)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8)
-                    .content("{ \"name\" : \"" + dummyName + "\" }"))
+                    .content(String.format(dummyJson, dummyFirstName,
+                                           dummyLastName, dummyAge,
+                                           dummyFavouriteColour,
+                                           Arrays.asList(dummyHobbies).toString())))
            //.andDo(print())
            .andExpect(status().isCreated())
            .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
            .andExpect(jsonPath("$._embedded.persons").isArray())
            .andExpect(jsonPath("$._embedded.persons.length()").value(1))
-           .andExpect(jsonPath("$._embedded.persons[0].personName")
-                              .value(dummyName))
+           .andExpect(jsonPath("$._embedded.persons[0].personFirstName")
+                              .value(dummyFirstName))
+           .andExpect(jsonPath("$._embedded.persons[0].personLastName")
+                              .value(dummyLastName))
+           .andExpect(jsonPath("$._embedded.persons[0].personAge")
+                              .value(dummyAge))
+           .andExpect(jsonPath("$._embedded.persons[0].personFavouriteColour")
+                              .value(dummyFavouriteColour))
+           .andExpect(jsonPath("$._embedded.persons[0].personHobbies")
+                              .isArray())
            .andExpect(jsonPath("$._embedded.persons[0]._links.self").exists())
            .andExpect(jsonPath("$._embedded.persons[0]._links.delete").exists())
            .andExpect(jsonPath("$._embedded.persons[0]._links.update").exists())
@@ -193,7 +266,11 @@ public class PersonControllerIT {
 
     verify(mockPersonService, times(1)).newPerson(Mockito.isA(PersonDto.class));
     verify(mockPersonDto, times(1)).getId();
-    verify(mockPersonDto, times(1)).getName();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
 
     verifyNoMoreInteractions(mockPersonService, mockPersonDto);
   }

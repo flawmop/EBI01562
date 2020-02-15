@@ -60,19 +60,22 @@ public class PersonServiceImpl implements PersonService {
   /* (non-Javadoc)
    * @see com.insilicosoft.api.person.service.PersonService#newPerson(com.insilicosoft.api.person.value.PersonDto)
    */
-  public PersonDto newPerson(final PersonDto newPerson)
+  public PersonDto newPerson(final PersonDto newPersonDto)
                              throws InvalidRequestException {
-    log.debug("~newPerson() : Invoked : '" + newPerson + "'");
+    log.debug("~newPerson() : Invoked : '" + newPersonDto + "'");
 
-    Person personEntity = null;
+    Person person = null;
     try {
-      // Transfer public-facing representation to internal representation
-      personEntity = new Person(newPerson.getName());
+      person = new Person(newPersonDto.getFirst_name(),
+                          newPersonDto.getLast_name(),
+                          newPersonDto.getAge(),
+                          newPersonDto.getFavourite_colour(),
+                          newPersonDto.getHobby());
     } catch (IllegalArgumentException e) {
       throw new InvalidRequestException(e.getMessage());
     }
 
-    return new PersonDto(repository.save(personEntity));
+    return new PersonDto(repository.save(person));
   }
 
   /* (non-Javadoc)
@@ -98,7 +101,12 @@ public class PersonServiceImpl implements PersonService {
     log.debug("~updatePerson() : Invoked : [" + personId + "] : '" + personDto + "'");
     final Person updatedPerson = repository.findById(personId)
                                            .map(existingPerson -> {
-                                             existingPerson.setName(personDto.getName());
+                                             existingPerson.setFirstName(personDto.getFirst_name());
+                                             existingPerson.setLastName(personDto.getLast_name());
+                                             existingPerson.setAge(personDto.getAge());
+                                             existingPerson.setFavouriteColour(personDto.getFavourite_colour());
+                                             existingPerson.setHobbies(personDto.getHobby());
+
                                              return repository.save(existingPerson);
                                            }).orElseThrow(
                                              () -> new PersonNotFoundException(String.valueOf(personId))
