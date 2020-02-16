@@ -25,7 +25,7 @@ Tested in [Vagrant](https://github.com/joanmarcriera/vagrant-file-for-java-apps)
 ```bash
  $ mvn clean verify
 ```
- 4. (Optional) Code coverage
+ 4. (Optional `sudo yum install lynx -y`) Code coverage
 ```bash
  $ lynx target/site/jacoco/index.html
 ```
@@ -72,7 +72,7 @@ curl -v -u admin:password -X PUT 127.0.0.1:8080/persons/1 -H 'Content-type:appli
         -d '{"first_name":"fn1.1","last_name":"ln1.1","age":11,"favourite_colour":"fc1.1","hobby":["h1.11", "h1.21"]}' | jq
 curl -v -u user:password 127.0.0.1:8080/persons/1 | jq
 curl -v -u admin:password -X PATCH 127.0.0.1:8080/persons/1 -H 'Content-type:application/json' \
-        -d '{"age":11}' | jq
+        -d '{"age":12}' | jq
 curl -v -u user:password 127.0.0.1:8080/persons/1 | jq
 curl -v -u admin:password -X DELETE 127.0.0.1:8080/persons/1 | jq
 curl -v -u admin:password -X DELETE 127.0.0.1:8080/persons/2 | jq
