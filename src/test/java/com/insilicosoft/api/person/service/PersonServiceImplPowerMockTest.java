@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,7 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.insilicosoft.api.person.dao.jpa.PersonRepository;
 import com.insilicosoft.api.person.entity.Person;
 import com.insilicosoft.api.person.exception.InvalidRequestException;
+import com.insilicosoft.api.person.value.AgeDto;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -37,6 +40,9 @@ import com.insilicosoft.api.person.value.PersonDto;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PersonServiceImpl.class })
 public class PersonServiceImplPowerMockTest {
+
+  @Mock
+  AgeDto mockAgeDto;
 
   @Mock
   PersonDto mockPersonDto;
@@ -153,5 +159,34 @@ public class PersonServiceImplPowerMockTest {
                              mockSavedPerson, mockSavedPersonDto);
 
     assertSame(mockSavedPersonDto, returnedNewPersonDto);
+  }
+
+  @Test
+  public void testUpdatePersonAge() throws Exception {
+    final Long dummyId = 1L;
+    final Integer dummyAge = 33;
+    final Person mockExistingPerson = mock(Person.class);
+    when(mockPersonRepository.findById(dummyId))
+        .thenReturn(Optional.of(mockExistingPerson));
+    when(mockAgeDto.getAge()).thenReturn(dummyAge);
+    doNothing().when(mockExistingPerson).setAge(dummyAge);
+    final Person mockModifiedPerson = mock(Person.class);
+    when(mockPersonRepository.save(mockExistingPerson))
+        .thenReturn(mockModifiedPerson);
+    whenNew(PersonDto.class).withArguments(mockModifiedPerson)
+           .thenReturn(mockPersonDto);
+
+    final PersonDto returnedModifiedPerson = personService.updatePersonAge(dummyId,
+                                                                           mockAgeDto);
+
+    verify(mockPersonRepository, times(1)).findById(dummyId);
+    verify(mockAgeDto, times(1)).getAge();
+    verify(mockExistingPerson, times(1)).setAge(dummyAge);
+    verify(mockPersonRepository, times(1)).save(mockExistingPerson);
+
+    verifyNoMoreInteractions(mockPersonRepository, mockExistingPerson,
+                             mockAgeDto, mockModifiedPerson);
+
+    assertSame(mockPersonDto, returnedModifiedPerson);
   }
 }

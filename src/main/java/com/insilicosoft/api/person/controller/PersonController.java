@@ -16,9 +16,11 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.Relation;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,6 +33,7 @@ import org.zalando.problem.Problem;
 import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
 import com.insilicosoft.api.person.service.PersonService;
+import com.insilicosoft.api.person.value.AgeDto;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -50,7 +53,7 @@ public class PersonController {
 
   /*
    *  Enable a HAL-compatible representation of the Person DTO!
-   *  TODO : Consider https://spring.io/guides/tutorials/bookmarks/#_simplifying_link_creation
+   *  TODO: Consider https://spring.io/guides/tutorials/bookmarks/#_simplifying_link_creation
    */
   // https://stackoverflow.com/questions/33289753/how-to-change-the-property-name-of-an-embbed-collection-in-spring-hateos
   @Relation(collectionRelation = "persons")
@@ -63,8 +66,8 @@ public class PersonController {
 
     public PersonResource(final PersonDto personDto) {
       super();
-      final Long personId = personDto.getId();
 
+      final Long personId = personDto.getId();
       setPersonFirstName(personDto.getFirst_name());
       setPersonLastName(personDto.getLast_name());
       setPersonAge(personDto.getAge());
@@ -220,7 +223,8 @@ public class PersonController {
    * @return The new person.
    * @throws InvalidRequestException If invalid data supplied.
    */
-  @PostMapping(produces = { "application/hal+json", "application/problem+json" })
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+               produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.CREATED)
   public Resources<PersonResource> newPerson(final @RequestBody
                                                    PersonDto personDto) 
@@ -266,6 +270,7 @@ public class PersonController {
    * @throws PersonNotFoundException If person not found.
    */
   @PutMapping(value = "/{personId}",
+              consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
               produces = { "application/hal+json", "application/problem+json" })
   @ResponseStatus(HttpStatus.OK)
   public Resources<PersonResource> updatePerson(final @PathVariable("personId")
@@ -283,4 +288,25 @@ public class PersonController {
                                          linkTo(PersonController.class)
                                                .withSelfRel());
   }
+
+  @PatchMapping(value = "/{personId}",
+                consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+                produces = { "application/hal+json", "application/problem+json" })
+  @ResponseStatus(HttpStatus.OK)
+  public Resources<PersonResource> updatePersonAge(final @PathVariable("personId")
+                                                         Long personId,
+                                                   final @RequestBody
+                                                         AgeDto ageDto)
+                                                   throws InvalidRequestException,
+                                                          PersonNotFoundException {
+    log.debug("~updatePersonAge() : Invoked : [" + personId + "] : '" + ageDto + "'");
+
+    final List<PersonResource> colOfOne = new ArrayList<PersonResource>();
+    colOfOne.add(new PersonResource(personService.updatePersonAge(personId,
+                                                                  ageDto)));
+    return new Resources<PersonResource>(colOfOne,
+                                         linkTo(PersonController.class)
+                                               .withSelfRel());
+  }
+
 }

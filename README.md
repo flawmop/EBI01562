@@ -9,7 +9,7 @@
  1. git
  1. jq (optional)
 
-Tested in [Vagrant](https://github.com/joanmarcriera/vagrant-file-for-java-apps) (after (1) [issue](https://github.com/hashicorp/vagrant/issues/9442#issuecomment-363080565), and (2) `vagrant up --provider virtualbox`.
+Tested in [Vagrant](https://github.com/joanmarcriera/vagrant-file-for-java-apps) (after (1) [issue](https://github.com/hashicorp/vagrant/issues/9442#issuecomment-363080565), and (2) `vagrant up --provider virtualbox`).
 
 ## Install, test, and start REST API
 
@@ -49,6 +49,7 @@ Tested in [Vagrant](https://github.com/joanmarcriera/vagrant-file-for-java-apps)
  | --- | --- | --- | --- |
  | GET | /persons | USER | Retrieve all users |
  | GET | /persons/{personId} | USER | Retrieve a single user (by id) |
+ | PATCH | /persons/{personId} | ADMIN | Modify a person's age (by id) |
  | POST | /persons | ADMIN | Add a new person |
  | PUT | /persons/{personId} | ADMIN | Update a person (by id) |
  | DELETE | /persons/{personId} | ADMIN | Delete a person (by id) |
@@ -69,8 +70,17 @@ curl -v -u user:password 127.0.0.1:8080/persons | jq
 curl -v -u user:password 127.0.0.1:8080/persons/1 | jq
 curl -v -u admin:password -X PUT 127.0.0.1:8080/persons/1 -H 'Content-type:application/json' \
         -d '{"first_name":"fn1.1","last_name":"ln1.1","age":11,"favourite_colour":"fc1.1","hobby":["h1.11", "h1.21"]}' | jq
-curl -v -u user:password 127.0.0.1:8080/persons | jq
+curl -v -u user:password 127.0.0.1:8080/persons/1 | jq
+curl -v -u admin:password -X PATCH 127.0.0.1:8080/persons/1 -H 'Content-type:application/json' \
+        -d '{"age":11}' | jq
+curl -v -u user:password 127.0.0.1:8080/persons/1 | jq
 curl -v -u admin:password -X DELETE 127.0.0.1:8080/persons/1 | jq
 curl -v -u admin:password -X DELETE 127.0.0.1:8080/persons/2 | jq
 curl -v -u user:password 127.0.0.1:8080/persons | jq
+```
+
+## TODO
+
+```bash
+grep -r 'TODO' src/ | awk -F'TODO' '{print $2}'
 ```

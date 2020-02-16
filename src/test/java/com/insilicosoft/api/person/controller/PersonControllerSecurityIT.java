@@ -35,6 +35,7 @@ import com.insilicosoft.api.person.value.PersonDto;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+// TODO: Satisfy self why PersonControllerSecurityIT component scans controller advice yet others don't!
 public class PersonControllerSecurityIT {
 
   @Autowired
@@ -137,4 +138,6 @@ public class PersonControllerSecurityIT {
 
     verifyNoMoreInteractions(mockPersonService, mockPersonDto);
   }
+
+  // TODO: Replicate security tests for all actions!
 }

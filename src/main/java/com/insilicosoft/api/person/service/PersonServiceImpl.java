@@ -13,6 +13,7 @@ import com.insilicosoft.api.person.dao.jpa.PersonRepository;
 import com.insilicosoft.api.person.entity.Person;
 import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
+import com.insilicosoft.api.person.value.AgeDto;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -99,6 +100,7 @@ public class PersonServiceImpl implements PersonService {
                                 throws InvalidRequestException,
                                        PersonNotFoundException {
     log.debug("~updatePerson() : Invoked : [" + personId + "] : '" + personDto + "'");
+
     final Person updatedPerson = repository.findById(personId)
                                            .map(existingPerson -> {
                                              existingPerson.setFirstName(personDto.getFirst_name());
@@ -106,6 +108,26 @@ public class PersonServiceImpl implements PersonService {
                                              existingPerson.setAge(personDto.getAge());
                                              existingPerson.setFavouriteColour(personDto.getFavourite_colour());
                                              existingPerson.setHobbies(personDto.getHobby());
+
+                                             return repository.save(existingPerson);
+                                           }).orElseThrow(
+                                             () -> new PersonNotFoundException(String.valueOf(personId))
+                                           );
+    return new PersonDto(updatedPerson);
+  }
+
+  /* (non-Javadoc)
+   * @see com.insilicosoft.api.person.service.PersonService#updatePersonAge(java.lang.Long, com.insilicosoft.api.person.value.AgeDto)
+   */
+  @Override
+  public PersonDto updatePersonAge(final Long personId, final AgeDto ageDto)
+                                   throws InvalidRequestException,
+                                          PersonNotFoundException {
+    log.debug("~updatePersonAge() : Invoked : [" + personId + "] : '" + ageDto + "'");
+
+    final Person updatedPerson = repository.findById(personId)
+                                           .map(existingPerson -> {
+                                             existingPerson.setAge(ageDto.getAge());
 
                                              return repository.save(existingPerson);
                                            }).orElseThrow(

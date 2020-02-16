@@ -33,6 +33,8 @@ public class PersonDtoTest {
 
   @Before
   public void setUp() {
+    personDto = null;
+
     dummyId = null;
     dummyFirstName = null;
     dummyLastName = null;

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.insilicosoft.api.person.exception.InvalidRequestException;
 import com.insilicosoft.api.person.exception.PersonNotFoundException;
+import com.insilicosoft.api.person.value.AgeDto;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -63,4 +64,21 @@ public interface PersonService {
   PersonDto updatePerson(final Long personId,
                          final PersonDto personDto)
                          throws InvalidRequestException, PersonNotFoundException;
+
+  /**
+   * Update the {@code Person}'s age.
+   * 
+   * @param personId System id of {@linkplain com.insilicosoft.api.person.entity.Person}
+   *                 to delete.
+   * @param personDto {@code Person} as DTO to update.
+   * @return Updated {@code Person} as DTO.
+   * @throws InvalidRequestException If invalid data submitted.
+   * @throws PersonNotFoundException If {@code Person} with specified {@code id}
+   *                                 not found. 
+   */
+  PersonDto updatePersonAge(final Long personId,
+                            final AgeDto ageDto)
+                            throws InvalidRequestException,
+                                   PersonNotFoundException;
+
 }

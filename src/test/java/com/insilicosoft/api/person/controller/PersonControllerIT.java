@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -37,6 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.insilicosoft.api.person.service.PersonService;
+import com.insilicosoft.api.person.value.AgeDto;
 import com.insilicosoft.api.person.value.PersonDto;
 
 /**
@@ -157,6 +159,54 @@ public class PersonControllerIT {
   }
 
   @Test
+  public void testPatchPerson() throws Exception {
+    final PersonDto mockPersonDto = mock(PersonDto.class);
+    final ArgumentCaptor<Long> personIdCaptor = ArgumentCaptor.forClass(Long.class);
+    final ArgumentCaptor<AgeDto> ageDtoCaptor = ArgumentCaptor.forClass(AgeDto.class);
+
+    when(mockPersonService.updatePersonAge(personIdCaptor.capture(),
+                                           ageDtoCaptor.capture()))
+        .thenReturn(mockPersonDto);
+    final Integer modifiedAge = 11;
+    when(mockPersonDto.getId()).thenReturn(dummyPersonId);
+    when(mockPersonDto.getFirst_name()).thenReturn(dummyFirstName);
+    when(mockPersonDto.getLast_name()).thenReturn(dummyLastName);
+    when(mockPersonDto.getAge()).thenReturn(modifiedAge);
+    when(mockPersonDto.getFavourite_colour()).thenReturn(dummyFavouriteColour);
+    when(mockPersonDto.getHobby()).thenReturn(dummyHobbies);
+
+    mockMvc.perform(patch(urlTemplatePersons.concat("/" + dummyPersonId))
+                         .header(HttpHeaders.CONTENT_TYPE,
+                                 MediaType.APPLICATION_JSON_UTF8)
+                         .content("{ \"age\": " + modifiedAge + " }"))
+           //.andDo(print())
+           .andExpect(status().isOk())
+           .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+           .andExpect(jsonPath("$._embedded.persons").isArray())
+           .andExpect(jsonPath("$._embedded.persons.length()").value(1))
+           .andExpect(jsonPath("$._embedded.persons[0].personAge")
+                              .value(modifiedAge))
+           .andExpect(jsonPath("$._embedded.persons[0]._links.self").exists())
+           .andExpect(jsonPath("$._embedded.persons[0]._links.delete").exists())
+           .andExpect(jsonPath("$._embedded.persons[0]._links.update").exists())
+           .andExpect(jsonPath("$._links.self.href").exists());
+
+    verify(mockPersonService, times(1)).updatePersonAge(Mockito.isA(Long.class),
+                                                        Mockito.isA(AgeDto.class));
+    verify(mockPersonDto, times(1)).getId();
+    verify(mockPersonDto, times(1)).getFirst_name();
+    verify(mockPersonDto, times(1)).getLast_name();
+    verify(mockPersonDto, times(1)).getAge();
+    verify(mockPersonDto, times(1)).getFavourite_colour();
+    verify(mockPersonDto, times(1)).getHobby();
+
+    verifyNoMoreInteractions(mockPersonService, mockPersonDto);
+
+    assertEquals(dummyPersonId, personIdCaptor.getValue());
+    assertEquals(modifiedAge, ageDtoCaptor.getValue().getAge());
+  }
+
+  @Test
   public void testPutPerson() throws Exception {
     final PersonDto mockPersonDto = mock(PersonDto.class);
     final ArgumentCaptor<Long> personIdCaptor = ArgumentCaptor.forClass(Long.class); 
@@ -223,6 +273,7 @@ public class PersonControllerIT {
     assertEquals(newFavouriteColour,
                  personDtoCaptor.getValue().getFavourite_colour());
     assertArrayEquals(newHobbies, personDtoCaptor.getValue().getHobby());
+
   }
 
   @Test
